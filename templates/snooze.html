@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Snooze
+{% endblock %}
+
+{% block main %}
+    <form action="{{ url_for('snooze') }}" method="post">
+        <fieldset style="text-align: left;">
+            <div class="form-group">
+                <input autofocus class="form-control" disabled name="name" value="{{ item.name }}"  type="text"/>
+            </div>
+            <div>
+                Snoozed Date:
+            </div>
+            <div class="form-group">
+                <input autocomplete="off" autofocus class="form-control" name="snoozed" value="{{ item.dt }}" type="date"/>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-default" name="item" value={{ item.id }} type="submit">Snooze</button>
+            </div>
+        </fieldset>
+    </form>
+{% endblock %}

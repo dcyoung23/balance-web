@@ -1,0 +1,221 @@
+{% extends "layout.html" %}
+
+{% block title %}
+
+{% endblock %}
+
+{% block main %}
+    <form action="{{ url_for('index') }}" method="post">
+        <table class="table table-striped" style="width:100%">
+          <tr>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Frequency</th>
+            <th>Method</th>
+            <th>Due Date</th>
+            <th>Checking</th>
+            <th>Credit Card</th>
+            <th></th>
+            <th></th>
+          </tr>
+          <tr>
+            <td>Current Balance</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+              <a href="{{ url_for('update') }}">{{ balances.current }}</a>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>Pending Transactions</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>{{ balances.pending }}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>Available Balance</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+              <a href="{{ url_for('update') }}">{{ balances.available }}</a>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+          <tr>
+            <td>
+                <b>Scheduled Transactions</b>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          </tr>
+            {% for item in scheduled if item.schedule_type == 'Current' %}
+              <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.label }}</td>
+                <td>{{ item.frequency_display }}</td>
+                <td>{{ item.pmt_method_desc }}</td>
+                <td>{{ item.dt }}</td>
+                {% if item.pmt_source == 'CHK' %}
+                  <td>{{ item.amount }}</td>
+                {% else %}
+                  <td></td>
+                {% endif %}
+                {% if item.pmt_source == 'CC' %}
+                  <td>{{ item.amount }}</td>
+                {% else %}
+                  <td></td>
+                {% endif %}
+                <td class="form-group">
+                    <select class="form-control" name="action">
+                        <option disabled="" selected="" value="">Action</option>
+                        <option>Post</option>
+                        <option>Snooze</option>
+                        <option>Edit</option>
+                        <option>Complete</option>
+                    </select>
+                </div>
+                <td class="form-group">
+                    <button class="btn btn-default" name="item" value={{ item.id }} type="submit">Submit</button>
+                </td>
+              </tr>
+            {% endfor %}
+          <tr>
+            <td>
+                <b>Scheduled Balance</b>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                <b>{{ balances.net }}</b>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>
+                <b>Next Scheduled Transactions</b>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+            {% for item in scheduled if item.schedule_type == 'Next' %}
+              <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.label }}</td>
+                <td>{{ item.frequency_display }}</td>
+                <td>{{ item.pmt_method_desc }}</td>
+                <td>{{ item.dt }}</td>
+                {% if item.pmt_source == 'CHK' %}
+                  <td>{{ item.amount }}</td>
+                {% else %}
+                  <td></td>
+                {% endif %}
+                {% if item.pmt_source == 'CC' %}
+                  <td>{{ item.amount }}</td>
+                {% else %}
+                  <td></td>
+                {% endif %}
+                <td class="form-group">
+                    <select class="form-control" name="action">
+                        <option disabled="" selected="" value="">Action</option>
+                        <option>Post</option>
+                        <option>Snooze</option>
+                        <option>Edit</option>
+                        <option>Complete</option>
+                    </select>
+                </div>
+                <td class="form-group">
+                    <button class="btn btn-default" name="item" value={{ item.id }} type="submit">Submit</button>
+                </td>
+              </tr>
+            {% endfor %}
+            <tr>
+              <td>
+                  <b>Next Scheduled Balance</b>
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>
+                  <b>{{ balances.next_net }}</b>
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          <tr>
+            <td>
+                <b>Future Transactions</b>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+            {% for item in scheduled if item.schedule_type == 'Future' %}
+              <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.label }}</td>
+                <td>{{ item.frequency_display }}</td>
+                <td>{{ item.pmt_method_desc }}</td>
+                <td>{{ item.dt }}</td>
+                {% if item.pmt_source == 'CHK' %}
+                  <td>{{ item.amount }}</td>
+                {% else %}
+                  <td></td>
+                {% endif %}
+                {% if item.pmt_source == 'CC' %}
+                  <td>{{ item.amount }}</td>
+                {% else %}
+                  <td></td>
+                {% endif %}
+                <td class="form-group">
+                    <select class="form-control" name="action">
+                        <option disabled="" selected="" value="">Action</option>
+                        <option>Post</option>
+                        <option>Snooze</option>
+                        <option>Edit</option>
+                        <option>Complete</option>
+                    </select>
+                </div>
+                <td class="form-group">
+                    <button class="btn btn-default" name="item" value={{ item.id }} type="submit">Submit</button>
+                </td>
+              </tr>
+            {% endfor %}
+    </form>
+{% endblock %}

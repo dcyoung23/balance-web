@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Edit
+{% endblock %}
+
+{% block main %}
+    <form action="{{ url_for('edit') }}" method="post">
+        <fieldset style="text-align: left;">
+            <div>Name:</div>
+            <div class="form-group">
+                <input autocomplete="off" autofocus class="form-control" name="name" value="{{ item.name }}"  type="text"/>
+            </div>
+            <div>Type:</div>
+            <div class="form-group">
+                <select class="form-control" name="type">
+                    <option disabled=""></option>
+                    {% for type in types %}
+                        {% if type.label == item.label %}
+                            <option selected value={{ type.id }}>{{ type.label }}</option>
+                        {% else %}
+                            <option value={{ type.id }}>{{ type.label }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div>Payment Source:</div>
+            <div class="form-group">
+                <select class="form-control" name="pmt-source">
+                    <option disabled=""></option>
+                    {% for code in codes if code.cd_group == 'pmt-source' %}
+                        {% if code.cd == item.pmt_source %}
+                            <option selected value={{ code.cd }}>{{ code.cd_desc }}</option>
+                        {% else %}
+                            <option value={{ code.cd }}>{{ code.cd_desc }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div>Payment Method:</div>
+            <div class="form-group">
+                <select class="form-control" name="pmt-method">
+                    <option disabled=""></option>
+                    {% for code in codes if code.cd_group == 'pmt-method' %}
+                        {% if code.cd == item.pmt_method %}
+                            <option selected value={{ code.cd }}>{{ code.cd_desc }}</option>
+                        {% else %}
+                            <option value={{ code.cd }}>{{ code.cd_desc }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div>Current Due Date:</div>
+            <div class="form-group">
+                <input autocomplete="off" autofocus class="form-control" name="current" value="{{ item.current_dt }}" type="date"/>
+            </div>
+            <div>Amount:</div>
+            <div class="form-group">
+                <input autocomplete="off" class="form-control" min="0" step=".01" name="amount" value="{{ item.amount }}" type="number"/>
+            </div>
+            <div>Frequency:</div>
+            <div class="form-group">
+                <select class="form-control" name="frequency">
+                    <option disabled=""></option>
+                    {% for frequency in frequencies %}
+                        {% if frequency.frequency == item.frequency %}
+                            <option selected value={{ frequency.id }}>{{ frequency.frequency }}</option>
+                        {% else %}
+                            <option value={{ frequency.id }}>{{ frequency.frequency }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div>Custom Repeat:</div>
+            <div class="form-group">
+                <input autocomplete="off" class="form-control" min="1" name="repeat" value="{{ item.repeat }}" type="number"/>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-default" name="id" value={{ item.id }} type="submit">Update</button>
+            </div>
+        </fieldset>
+    </form>
+{% endblock %}

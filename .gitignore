@@ -1,0 +1,10 @@
+# Byte-compiled / optimized / DLL files
+__pycache__
+.ipynb_checkpoints
+__init__.py
+**.pyc
+
+# Personal usage
+balance.db
+**.sql
+**.ipynb

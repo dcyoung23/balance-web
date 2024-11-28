@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add
+{% endblock %}
+
+{% block main %}
+    <form action="{{ url_for('add') }}" method="post">
+        <fieldset style="text-align: left;">
+            <div class="form-group">
+                <input autocomplete="off" autofocus class="form-control" name="name" placeholder="Name" type="text"/>
+            </div>
+            <div class="form-group">
+                <select class="form-control" name="type">
+                    <option disabled="" selected="" >Type</option>
+                    {% for type in types %}
+                        <option value={{ type.id }}>{{ type.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <select class="form-control" name="pmt-source">
+                    <option disabled="" selected="" >Payment Source</option>
+                    {% for code in codes if code.cd_group == 'pmt-source' %}
+                        <option value={{ code.cd }}>{{ code.cd_desc }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <select class="form-control" name="pmt-method">
+                    <option disabled="" selected="" >Payment Method</option>
+                    {% for code in codes if code.cd_group == 'pmt-method' %}
+                        <option value={{ code.cd }}>{{ code.cd_desc }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>Current Due Date:</div>
+            <div class="form-group">
+                <input autocomplete="off" autofocus class="form-control" name="current" type="date"/>
+            </div>
+            <div class="form-group">
+                <input autocomplete="off" class="form-control" min="0" step=".01" name="amount" placeholder="Amount" type="number"/>
+            </div>
+            <div class="form-group">
+                <select class="form-control" name="frequency">
+                    <option disabled="" selected="" >Frequency</option>
+                    {% for frequency in frequencies %}
+                        <option value={{ frequency.id }}>{{ frequency.frequency }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>Custom Repeat:</div>
+            <div class="form-group">
+                <input autocomplete="off" class="form-control" min="1" value="1"  name="repeat" placeholder="Custom Repeat" type="number"/>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-default" type="submit">Add</button>
+            </div>
+        </fieldset>
+    </form>
+{% endblock %}
