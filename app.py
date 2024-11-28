@@ -29,6 +29,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # configure database connection
+print(os.getenv('DATABASE_URL'))
 if os.getenv('DATABASE_URL'):
     db = SQL(os.getenv('DATABASE_URL'))
 else:
