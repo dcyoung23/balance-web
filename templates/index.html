@@ -95,7 +95,7 @@
                     </select>
                 </div>
                 <td class="form-group">
-                    <button class="btn btn-default" name="item" value={{ item.id }} type="submit">Submit</button>
+                    <button class="btn btn-default" name="item" value={{ item.schedule_id }} type="submit">Submit</button>
                 </td>
               </tr>
             {% endfor %}
@@ -154,7 +154,7 @@
                     </select>
                 </div>
                 <td class="form-group">
-                    <button class="btn btn-default" name="item" value={{ item.id }} type="submit">Submit</button>
+                    <button class="btn btn-default" name="item" value={{ item.schedule_id }} type="submit">Submit</button>
                 </td>
               </tr>
             {% endfor %}
@@ -186,7 +186,7 @@
             <td></td>
             <td></td>
           </tr>
-            {% for item in scheduled if item.schedule_type == 'Future' %}
+            {% for item in scheduled if item.schedule_type == 'Future' or item.schedule_type == 'Unknown'  %}
               <tr>
                 <td>{{ item.name }}</td>
                 <td>{{ item.label }}</td>
@@ -213,7 +213,7 @@
                     </select>
                 </div>
                 <td class="form-group">
-                    <button class="btn btn-default" name="item" value={{ item.id }} type="submit">Submit</button>
+                    <button class="btn btn-default" name="item" value={{ item.schedule_id }} type="submit">Submit</button>
                 </td>
               </tr>
             {% endfor %}

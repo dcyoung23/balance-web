@@ -36,13 +36,14 @@ def login_required(f):
     return decorated_function
 
 
-def get_item(db, id):
+def get_item(db, schedule_id):
     # query database for specific schedule item
-    item = db.execute("SELECT A.*,B.label,B.factor,C.frequency,C.modifier,C.n,coalesce(A.snoozed_dt,A.current_dt) AS dt \
+    item = db.execute("SELECT A.user_id, A.schedule_id, A.name, A.type_id, A.current_dt, A.snoozed_dt, A.previous_dt, A.frequency_id, A.repeat, A.amount, \
+                      B.label, B.factor, C.frequency, C.modifier, C.n, coalesce(A.snoozed_dt,A.current_dt) AS dt \
                       FROM schedule A \
-                      INNER JOIN type B ON A.type_id = B.id \
-                      INNER JOIN frequency C ON A.frequency_id = C.id \
-                      WHERE A.id = :id;", id=id)
+                      INNER JOIN type B ON A.type_id = B.type_id \
+                      INNER JOIN frequency C ON A.frequency_id = C.frequency_id \
+                      WHERE A.schedule_id = :schedule_id;", schedule_id=schedule_id)
 
     # since querying specific item return index 0
     return item[0]
@@ -50,21 +51,21 @@ def get_item(db, id):
 
 def get_scheduled(db, user_id):
     # query database for all scheduled items and use schedule_type for current, next and future
-    scheduled = db.execute("SELECT A.user_id,A.id,A.name,A.type_id,A.current_dt,A.snoozed_dt,A.previous_dt,A.frequency_id,A.repeat,B.label \
-                           ,B.factor,C.frequency,C.modifier,C.n,A.dt,A.pmt_source,D.cd_desc AS pmt_source_desc,A.pmt_method,D2.cd_desc AS pmt_method_desc \
+    scheduled = db.execute("SELECT A.user_id, A.schedule_id, A.name, A.type_id, A.current_dt, A.snoozed_dt, A.previous_dt, A.frequency_id, A.repeat, \
+                           B.label, B.factor, C.frequency, C.modifier, C.n, A.dt, A.pmt_source, D.cd_desc AS pmt_source_desc, A.pmt_method, D2.cd_desc AS pmt_method_desc \
                            ,A.amount,CASE WHEN dt < pay_current_dt THEN 'Current' \
                            WHEN dt >= pay_current_dt AND dt < pay_next_dt THEN 'Next' \
                            WHEN dt >= pay_next_dt THEN 'Future' \
                            ELSE 'Unknown' END AS schedule_type \
                            FROM (SELECT *,coalesce(snoozed_dt,current_dt) AS dt FROM schedule) A \
-                           INNER JOIN type B ON A.type_id = B.id \
-                           INNER JOIN frequency C ON A.frequency_id = C.id \
-                           INNER JOIN \
+                           INNER JOIN type B ON A.type_id = B.type_id \
+                           INNER JOIN frequency C ON A.frequency_id = C.frequency_id \
+                           LEFT JOIN \
                            	(SELECT user_id \
                            	,MIN(current_dt) AS pay_current_dt \
                            	,MIN(current_dt + ((repeat * F.n)::TEXT || ' ' || modifier::TEXT)::INTERVAL) As pay_next_dt \
                            	FROM schedule S \
-                           	INNER JOIN frequency F ON S.frequency_id = F.id \
+                           	INNER JOIN frequency F ON S.frequency_id = F.frequency_id \
                            	WHERE type_id = 1 \
                            	AND completed_dt is NULL \
                            	GROUP BY user_id \
@@ -102,7 +103,7 @@ def format_schedule(schedule):
 
 def get_balances(db, user_id):
     # query database for balances
-    balance = db.execute("SELECT * \
+    balance = db.execute("SELECT user_id, current, available \
                          FROM balance \
                          WHERE user_id = :user_id;", user_id=user_id)
 
@@ -134,7 +135,7 @@ def get_balances(db, user_id):
 
 def format_balances(balances):
     # convert all balances to usd for display on page
-    for k, v in balances.items():
+    for k, _ in balances.items():
         balances[k] = usd(balances[k])
 
 
@@ -155,25 +156,25 @@ def format_modifier(item):
 
 def get_types(db):
     # query database for types
-    types = db.execute("SELECT * \
+    types = db.execute("SELECT type_id, label, factor \
                        FROM type \
-                       ORDER BY id;")
+                       ORDER BY type_id;")
 
     return types
 
 
 def get_frequencies(db):
     # query database for frequencies
-    frequencies = db.execute("SELECT * \
+    frequencies = db.execute("SELECT frequency_id, frequency, modifier, n \
                              FROM frequency \
-                             ORDER BY id;")
+                             ORDER BY frequency_id;")
 
     return frequencies
 
 
 def get_codes(db):
     # query database for codes
-    codes = db.execute("SELECT * \
+    codes = db.execute("SELECT cd, cd_group, cd_desc \
                         FROM cd \
                         ORDER BY cd_group, cd;")
     
@@ -189,30 +190,30 @@ def insert_schedule(db, user_id, data):
                pmt_source=data["pmt_source"], pmt_method=data["pmt_method"])
 
 
-def complete_item(db, id):
+def complete_item(db, schedule_id):
     # update completed_dt and reset snoozed_dt
     db.execute("UPDATE schedule \
                SET completed_dt = date('now') \
                ,snoozed_dt = NULL \
-               WHERE id = :id;", id=id)
+               WHERE schedule_id = :schedule_id;", schedule_id=schedule_id)
 
 
 def snooze_item(db, data):
     # update snoozed_dt
     db.execute("UPDATE schedule \
                SET snoozed_dt = :snoozed \
-               WHERE id = :id;",snoozed=data["snoozed"], id=data["id"])
+               WHERE schedule_id = :schedule_id;",snoozed=data["snoozed"], schedule_id=data["schedule_id"])
 
 
-def update_schedule(db, user_id, data):
+def update_schedule(db, data):
     # logic for post action
     if data["action"] == "Post":
         # get schedule item
-        item = get_item(db, data["id"])
+        item = get_item(db, data["schedule_id"])
 
         # set completed_dt for One Time
         if item['frequency'] == "One Time":
-                complete_item(db, data["id"])
+                complete_item(db, data["schedule_id"])
 
         # all others move current_dt forward
         else:
@@ -224,11 +225,11 @@ def update_schedule(db, user_id, data):
                        SET current_dt = current_dt + :modifier ::INTERVAL \
                        ,snoozed_dt = NULL \
                        ,previous_dt = current_dt \
-                       WHERE id = :id;", id=data["id"], modifier=modifier)
+                       WHERE schedule_id = :schedule_id;", schedule_id=data["schedule_id"], modifier=modifier)
 
     # complete action
     elif data["action"] == "Complete":
-        complete_item(db, data["id"])
+        complete_item(db, data["schedule_id"])
 
     # edit action
     elif data["action"] == "Edit":
@@ -243,7 +244,7 @@ def update_schedule(db, user_id, data):
                        ,amount = :amount \
                        ,pmt_source = :pmt_source\
                        ,pmt_method = :pmt_method\
-                       WHERE id = :id;", id=data["id"], name=data["name"], type_id=data["type_id"],
+                       WHERE schedule_id = :schedule_id;", schedule_id=data["schedule_id"], name=data["name"], type_id=data["type_id"],
                        current_dt=data["current_dt"], frequency_id=data["frequency_id"],
                        repeat=data["repeat"], amount=data["amount"], 
                        pmt_source=data["pmt_source"], pmt_method=data["pmt_method"])

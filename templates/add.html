@@ -14,7 +14,7 @@
                 <select class="form-control" name="type">
                     <option disabled="" selected="" >Type</option>
                     {% for type in types %}
-                        <option value={{ type.id }}>{{ type.label }}</option>
+                        <option value={{ type.type_id }}>{{ type.label }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -45,7 +45,7 @@
                 <select class="form-control" name="frequency">
                     <option disabled="" selected="" >Frequency</option>
                     {% for frequency in frequencies %}
-                        <option value={{ frequency.id }}>{{ frequency.frequency }}</option>
+                        <option value={{ frequency.frequency_id }}>{{ frequency.frequency }}</option>
                     {% endfor %}
                 </select>
             </div>

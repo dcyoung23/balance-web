@@ -17,9 +17,9 @@
                     <option disabled=""></option>
                     {% for type in types %}
                         {% if type.label == item.label %}
-                            <option selected value={{ type.id }}>{{ type.label }}</option>
+                            <option selected value={{ type.type_id }}>{{ type.label }}</option>
                         {% else %}
-                            <option value={{ type.id }}>{{ type.label }}</option>
+                            <option value={{ type.type_id }}>{{ type.label }}</option>
                         {% endif %}
                     {% endfor %}
                 </select>
@@ -64,9 +64,9 @@
                     <option disabled=""></option>
                     {% for frequency in frequencies %}
                         {% if frequency.frequency == item.frequency %}
-                            <option selected value={{ frequency.id }}>{{ frequency.frequency }}</option>
+                            <option selected value={{ frequency.frequency_id }}>{{ frequency.frequency }}</option>
                         {% else %}
-                            <option value={{ frequency.id }}>{{ frequency.frequency }}</option>
+                            <option value={{ frequency.frequency_id }}>{{ frequency.frequency }}</option>
                         {% endif %}
                     {% endfor %}
                 </select>
@@ -76,7 +76,7 @@
                 <input autocomplete="off" class="form-control" min="1" name="repeat" value="{{ item.repeat }}" type="number"/>
             </div>
             <div class="form-group">
-                <button class="btn btn-default" name="id" value={{ item.id }} type="submit">Update</button>
+                <button class="btn btn-default" name="schedule_id" value={{ item.schedule_id }} type="submit">Update</button>
             </div>
         </fieldset>
     </form>

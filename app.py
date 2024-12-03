@@ -29,10 +29,10 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # configure database connection
-print(os.getenv('DATABASE_URL'))
 if os.getenv('DATABASE_URL'):
     db = SQL(os.getenv('DATABASE_URL'))
 else:
+    # Local debugging
     db = SQL("postgresql://balance_user:balance@localhost/balance")
 
 
@@ -57,8 +57,8 @@ def index():
 
     if request.method == "POST":
         data = {}
-        # get id
-        data["id"] = request.form.get("item")
+        # get schedule_id
+        data["schedule_id"] = request.form.get("item")
 
         # get action
         data["action"] = request.form.get("action")
@@ -69,7 +69,7 @@ def index():
             return redirect(url_for('index'))
 
         # get schedule item
-        item = get_item(db, data["id"])
+        item = get_item(db, data["schedule_id"])
 
         # get types
         types = get_types(db)
@@ -89,7 +89,7 @@ def index():
             return render_template("edit.html", item=item, types=types, frequencies=frequencies, codes=codes)
 
         else:
-            update_schedule(db, session["user_id"], data)
+            update_schedule(db, data)
 
         return redirect(url_for('index'))
 
@@ -122,7 +122,7 @@ def login():
             return render_template("login.html")
 
         # remember which user has logged in
-        session["user_id"] = users[0]["id"]
+        session["user_id"] = users[0]["user_id"]
 
         # redirect user to home page
         return redirect(url_for("index"))
@@ -169,17 +169,17 @@ def register():
                         VALUES(:username, :hash);", username=request.form.get("username"),
                        hash=pwd_context.hash(request.form.get("password")))
 
-            # query database for id
-            user = db.execute("SELECT * \
+            # query database for user
+            user = db.execute("SELECT user_id, username \
                               FROM users \
                               WHERE username = :username;", username=request.form.get("username"))
 
             # remember which user has logged in
-            session["user_id"] = user[0]["id"]
+            session["user_id"] = user[0]["user_id"]
 
             # insert new user in balance
             db.execute("INSERT INTO balance (user_id) \
-                       VALUES(:user_id);", user_id=user[0]["id"])
+                       VALUES(:user_id);", user_id=user[0]["user_id"])
 
             # flash message that user successfully registered on Index
             flash('Successfully registered! Set your Balances!')
@@ -282,8 +282,8 @@ def snooze():
     if request.method == "POST":
         data = {}
 
-        # get item id from button
-        data["id"] = request.form.get("item")
+        # get item schedule_id from button
+        data["schedule_id"] = request.form.get("item")
 
         # get snoozed date
         data["snoozed"] = request.form.get("snoozed")
@@ -309,7 +309,7 @@ def edit():
         data = {}
 
         # Add schedule fields from form
-        data["id"] = request.form.get("id")
+        data["schedule_id"] = request.form.get("schedule_id")
         data["name"] = request.form.get("name")
         data["type_id"] = request.form.get("type")
         data['pmt_source'] = request.form.get("pmt-source")
@@ -327,7 +327,7 @@ def edit():
                 return redirect(url_for('index'))
 
         # update schedule
-        update_schedule(db, session["user_id"], data)
+        update_schedule(db, data)
 
         # flash message that item edited
         flash('Edited!')
